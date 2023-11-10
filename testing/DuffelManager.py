@@ -5,6 +5,7 @@ from duffel_api import Duffel
 from typing import Optional, List
 from models import MyOffer, DuffelAPIError, DuffelAPIErrorData, SuccessResponse, ErrorResponse
 from datetime import datetime, time
+import magicdate
 
 load_dotenv("../.env")
 duffel = Duffel(access_token=os.getenv("DUFFEL_API_KEY"))
@@ -57,7 +58,8 @@ class DuffelManager:
     @staticmethod
     def calculate_offer_score(curr_offer, cost_weight, segments_weight, min_cost, max_segments):
         def normalize_value(value, min_value, max_value):
-            if max_value - min_value == 0: return 0
+            if max_value - min_value == 0:
+                return 0
             return (value - min_value) / (max_value - min_value)
 
         normalized_cost = normalize_value(float(curr_offer.total_amount), min_cost, min_cost)
@@ -90,9 +92,6 @@ class DuffelManager:
 
     def get_best_offer(self, offers: List[MyOffer], airline_name: Optional[str] = None,
                        time_of_day: Optional[str] = None) -> Optional[MyOffer]:
-        # Lots of improvements to be made here
-        # 1. Instead of giving up on time of day if there are none at that time, we should try to find the closest time
-        # 2. Same idea with cabin class, if there are no offers for the specified cabin class, we should try to find the closest cabin class
         logging.info(f"Getting best offer from {len(offers)} offers")
         cost_weight = 0.7
         segments_weight = 0.3
@@ -134,14 +133,14 @@ class DuffelManager:
             logging.info("Returning best offer")
             return SuccessResponse(
                 success=True,
-                best_offer=best_offer,
+                resp=best_offer,
             )
 
         except (ValueError, DuffelAPIError) as e:
-            logging.error(f"Error in get_offer: {str(e)}")
+            logging.error(f"{str(e)}")
             return ErrorResponse(
                 success=False,
-                error_message=str(e),
+                error=str(e),
             )
 
     def test_get_one_offer(self, departure_city: str, destination_city: str, departure_date: str,
@@ -153,8 +152,23 @@ class DuffelManager:
         return self.api_client.offers.list(offer_request_id, sort="total_amount")
 
 
-def get_best_offer(departure_city: str, destination_city: str, departure_date: str, time_of_day: str = None,
-                   airline: str = None, cabin_class: str = None) -> dict:
+def book_best_flight(departure_city: str, destination_city: str, departure_date: str, time_of_day: str = None,
+                     airline: str = None, cabin_class: str = None):
     return DuffelManager(duffel).get_offer(departure_city, destination_city, departure_date, time_of_day, airline,
                                            cabin_class)
+
+
+def get_absolute_date(relative_date: str):
+    try:
+        datetime.strptime(relative_date, "%Y-%m-%d")
+        return SuccessResponse(
+            success=True,
+            resp=relative_date,
+        )
+    # improve this error handling
+    except Exception:
+        return ErrorResponse(
+            success=False,
+            error="Invalid date format. Try providing a relative date or an absolute date in the format YYYY-MM-DD",
+        )
 

@@ -32,14 +32,17 @@ class MyOffer(BaseModel):
     cabin_class: Optional[str] = None
     offer: Offer
 
+    def __str__(self):
+        return f"This flight is on {self.airline_name} with {self.num_segments - 1} stops on {self.departure_time} in {self.cabin_class} class for ${self.total_amount}"
+
 
 class SuccessResponse(BaseModel):
     success: bool
-    best_offer: MyOffer
+    resp: object
     error: Optional[str] = None
 
 
 class ErrorResponse(BaseModel):
     success: bool
-    best_offer: Optional[MyOffer] = None
+    resp: Optional[object] = None
     error: str
