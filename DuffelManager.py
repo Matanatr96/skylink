@@ -1,5 +1,7 @@
 import os
 import logging
+
+import magicdate
 from dotenv import load_dotenv
 from duffel_api import Duffel
 from typing import Optional, List
@@ -159,10 +161,11 @@ def book_best_flight(departure_city: str, destination_city: str, departure_date:
 
 def get_absolute_date(relative_date: str):
     try:
-        datetime.strptime(relative_date, "%Y-%m-%d")
+        absolute_date = magicdate.magicdate(relative_date)
+        string_date = datetime.strftime(absolute_date, "%Y-%m-%d")
         return SuccessResponse(
             success=True,
-            resp=relative_date,
+            resp=string_date
         )
     # improve this error handling
     except Exception:
