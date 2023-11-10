@@ -5,9 +5,8 @@ from duffel_api import Duffel
 from typing import Optional, List
 from models import MyOffer, DuffelAPIError, DuffelAPIErrorData, SuccessResponse, ErrorResponse
 from datetime import datetime, time
-import magicdate
 
-load_dotenv("../.env")
+load_dotenv(".env")
 duffel = Duffel(access_token=os.getenv("DUFFEL_API_KEY"))
 openai_api_key = os.getenv("OPENAI_API_KEY")
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
