@@ -154,8 +154,8 @@ class DuffelManager:
 
 
 def book_best_flight(departure_city: str, destination_city: str, departure_date: str, time_of_day: str = None,
-                     airline: str = None, cabin_class: str = None):
-    return DuffelManager(duffel).get_offer(departure_city, destination_city, departure_date, time_of_day, airline,
+                     airline_name: str = None, cabin_class: str = None):
+    return DuffelManager(duffel).get_offer(departure_city, destination_city, departure_date, time_of_day, airline_name,
                                            cabin_class)
 
 
